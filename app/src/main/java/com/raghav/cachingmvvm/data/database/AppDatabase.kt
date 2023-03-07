@@ -2,14 +2,12 @@ package com.raghav.cachingmvvm.data.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import com.raghav.cachingmvvm.data.model.SampleApiResponse
+import com.raghav.cachingmvvm.data.model.ArticlesResponseItem
 
 @Database(
-    entities = [SampleApiResponse::class],
+    entities = [ArticlesResponseItem::class],
     version = 1
 )
-@TypeConverters(TypeConverter::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun dao(): AppDao
