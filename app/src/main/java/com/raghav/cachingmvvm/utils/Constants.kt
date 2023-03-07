@@ -23,6 +23,8 @@ class Constants {
             "https://play.google.com/store/apps/details?id=com.application.kurukshetrauniversitypapers"
         const val SPACE_DAWN_PLAYSTORE_LINK = "https://github.com/avidraghav/SpaceFlightNewsApp"
 
-        const val SAMPLE_KEY = "SAMPLE_KEY"
+        const val INITIAL_INPUT = "initial_input"
+        const val OUTPUT_FROM_SYNC_WORKER = "output_from_sync_worker"
+        const val OUTPUT_FROM_FAKE_WORKER = "output_from_fake_worker"
     }
 }

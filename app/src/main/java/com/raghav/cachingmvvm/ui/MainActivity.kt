@@ -1,6 +1,7 @@
 package com.raghav.cachingmvvm.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import com.raghav.cachingmvvm.databinding.ActivityMainBinding
+import com.raghav.cachingmvvm.utils.Constants
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -32,6 +34,39 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        viewModel.schedulePeriodicArticlesSync()
+        viewModel.performChainedWork()
+
+        viewModel.outputWorkInfos.observe(this) { workInfos ->
+
+            val syncWorkInfo = workInfos.find {
+                it.tags.contains("SyncWorker")
+            }
+            val fakeWorkerInfo = workInfos.find {
+                it.tags.contains("FakeWorker")
+            }
+
+            Log.d(
+                TAG,
+                "SyncWorker " + syncWorkInfo?.state?.name.orEmpty()
+            )
+            Log.d(
+                TAG,
+                "FakeWorker " + fakeWorkerInfo?.state?.name.orEmpty()
+            )
+            Log.d(
+                TAG,
+                "SyncWorker " + syncWorkInfo?.outputData?.getString(Constants.OUTPUT_FROM_SYNC_WORKER)
+                    .orEmpty()
+            )
+            Log.d(
+                TAG,
+                "FakeWorker " + fakeWorkerInfo?.outputData?.getString(Constants.OUTPUT_FROM_FAKE_WORKER)
+                    .orEmpty()
+            )
+        }
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 }

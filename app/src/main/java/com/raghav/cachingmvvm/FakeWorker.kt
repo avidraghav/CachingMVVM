@@ -4,35 +4,28 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.raghav.cachingmvvm.repository.Repository
 import com.raghav.cachingmvvm.utils.Constants
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import kotlinx.coroutines.delay
 import kotlin.random.Random
 
-@HiltWorker
-class SyncWorker @AssistedInject constructor(
-    @Assisted ctx: Context,
-    @Assisted params: WorkerParameters,
-    private val repository: Repository
+// this worker is just to demonstrate chaining of Workers
+class FakeWorker(
+    ctx: Context,
+    params: WorkerParameters
 ) : CoroutineWorker(ctx, params) {
 
-    // this method is used by WorkManager to show ForeGround Notification
-    // when the work is set to be expedited
     override suspend fun getForegroundInfo(): ForegroundInfo {
         return ForegroundInfo(
             Random.nextInt(),
             NotificationCompat.Builder(appContext)
                 .setSmallIcon(R.drawable.ic_launcher_foreground)
                 .setContentTitle("Worker has started")
-                .setContentText("syncing data from server")
+                .setContentText("Fake Worker")
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setVibrate(LongArray(0))
                 .build()
@@ -41,26 +34,14 @@ class SyncWorker @AssistedInject constructor(
 
     private val appContext = applicationContext
     override suspend fun doWork(): Result {
-        val input = inputData.getString(Constants.INITIAL_INPUT) ?: return Result.failure()
+        val input =
+            inputData.getString(Constants.OUTPUT_FROM_SYNC_WORKER) ?: return Result.failure()
         showNotification(input)
-        return try {
-            val refreshSuccessful = repository.refreshArticlesInDb()
-            if (refreshSuccessful) {
-                Log.i(TAG, "Worker was successful")
-                Result.success(
-                    workDataOf(
-                        Constants.OUTPUT_FROM_SYNC_WORKER to "output from Sync Worker"
-                    )
-                )
-            } else {
-                Log.i(TAG, "Worker was not successful will retry")
-                Result.retry()
-            }
-        } catch (t: Throwable) {
-            Log.e(TAG, "Worker failed:  ${t.localizedMessage}")
-            t.printStackTrace()
-            Result.failure()
-        }
+
+        delay(5000)
+        return Result.success(
+            workDataOf(Constants.OUTPUT_FROM_FAKE_WORKER to "output from fake worker")
+        )
     }
 
     private suspend fun showNotification(value: String) {
@@ -85,7 +66,7 @@ class SyncWorker @AssistedInject constructor(
                 NotificationCompat.Builder(appContext, Constants.CHANNEL_ID)
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentTitle("Worker has started $value")
-                    .setContentText("syncing data from server")
+                    .setContentText("Fake Worker")
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .setVibrate(LongArray(0))
                     .build()
@@ -94,6 +75,6 @@ class SyncWorker @AssistedInject constructor(
     }
 
     companion object {
-        private const val TAG = "SyncWorker"
+        private const val TAG = "FakeWorker"
     }
 }
