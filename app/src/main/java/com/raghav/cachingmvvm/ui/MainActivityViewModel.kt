@@ -53,11 +53,13 @@ class MainActivityViewModel @Inject constructor(
         }
     }
 
+    // chaining periodic work is not supported
     fun schedulePeriodicArticlesSync() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
+        // 15 minutes is the minimum interval
         val syncWorkRequest = PeriodicWorkRequestBuilder<SyncWorker>(
             repeatInterval = 15,
             repeatIntervalTimeUnit = TimeUnit.MINUTES
